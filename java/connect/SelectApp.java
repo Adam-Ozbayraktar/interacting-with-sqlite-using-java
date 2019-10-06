@@ -19,9 +19,27 @@ public class SelectApp {
         return conn;
     }
 
-    public void SelectAll(){
-        String sql = "SELECT * FROM Bank_Transactions";
+    public ResultSet SelectAll() throws SQLException{
+        String sql = "SELECT * FROM Bank_Transactions WHERE "
+                    + "card = 'DEBIT CARD PURCHASE FROM' AND"
+                    + "date BETWEEN '2019-09-08' AND '2019-09-15'";
+        /* Try with resource: A resource is an object that must be
+            closed after the program is finished, try with resource
+            ensures that the resource is closed at the end of
+            statement
+        */
+        try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            //PreparedStatement pstmt = conn.PreparedStatement(sql);) {
+            return rs;
+            //psmt.SetString()
+        } catch (SQLException e) {
+            throw new SQLException(e.getMessage());
+            //System.out.println(e.getMessage());
+        }
 
+        /*
         try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)){
@@ -34,10 +52,21 @@ public class SelectApp {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        */
+
     }
 
     public static void main(String[] args) {
         SelectApp app = new SelectApp();
-        app.SelectAll();
+        try (ResultSet rs = app.SelectAll()) {
+            while (rs.next()) {
+                System.out.println(rs.getString("date") + "\t" +
+                                    rs.getDouble("amount_left"));
+            }
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+
+
     }
 }
